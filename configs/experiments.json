@@ -1,0 +1,78 @@
+{
+  "server_bin": "llama-server",
+  "host": "127.0.0.1",
+  "port": 8080,
+  "memory_bandwidth_gbs": 51.2,
+  "warmup": true,
+  "experiments": [
+    {
+      "name": "QAD-Q4_0-2K",
+      "quantization": "Q4_0",
+      "model": "models/LFM3-1.7B-QAD-Q4_0.gguf",
+      "n_ctx": 2048,
+      "n_gpu_layers": 0,
+      "speculation": {"enabled": false}
+    },
+    {
+      "name": "PTQ-Q4_K_M-2K",
+      "quantization": "Q4_K_M",
+      "model": "models/LFM3-1.7B-Q4_K_M.gguf",
+      "n_ctx": 2048,
+      "n_gpu_layers": 0,
+      "speculation": {"enabled": false}
+    },
+    {
+      "name": "PTQ-Q8_0-2K",
+      "quantization": "Q8_0",
+      "model": "models/LFM3-1.7B-Q8_0.gguf",
+      "n_ctx": 2048,
+      "n_gpu_layers": 0,
+      "speculation": {"enabled": false}
+    },
+    {
+      "name": "QAD-Q4_0-4K",
+      "quantization": "Q4_0",
+      "model": "models/LFM3-1.7B-QAD-Q4_0.gguf",
+      "n_ctx": 4096,
+      "n_gpu_layers": 0,
+      "workloads": ["json-extraction"],
+      "speculation": {"enabled": false}
+    },
+    {
+      "name": "QAD-Q4_0-8K",
+      "quantization": "Q4_0",
+      "model": "models/LFM3-1.7B-QAD-Q4_0.gguf",
+      "n_ctx": 8192,
+      "n_gpu_layers": 0,
+      "workloads": ["json-extraction"],
+      "speculation": {"enabled": false}
+    },
+    {
+      "name": "QAD-Q4_0-16K",
+      "quantization": "Q4_0",
+      "model": "models/LFM3-1.7B-QAD-Q4_0.gguf",
+      "n_ctx": 16384,
+      "n_gpu_layers": 0,
+      "workloads": ["json-extraction"],
+      "speculation": {"enabled": false}
+    },
+    {
+      "name": "QAD-Q4_0-32K",
+      "quantization": "Q4_0",
+      "model": "models/LFM3-1.7B-QAD-Q4_0.gguf",
+      "n_ctx": 32768,
+      "n_gpu_layers": 0,
+      "workloads": ["json-extraction"],
+      "speculation": {"enabled": false}
+    },
+    {
+      "name": "QAD-Q4_0-ngram",
+      "quantization": "Q4_0",
+      "model": "models/LFM3-1.7B-QAD-Q4_0.gguf",
+      "n_ctx": 2048,
+      "n_gpu_layers": 0,
+      "workloads": ["json-extraction", "tool-calling"],
+      "speculation": {"enabled": true, "method": "ngram-simple", "num_tokens": 3}
+    }
+  ]
+}

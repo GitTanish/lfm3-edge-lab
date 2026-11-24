@@ -1,0 +1,28 @@
+{
+  "workloads": [
+    {
+      "name": "json-extraction",
+      "type": "json",
+      "prompt": "Complete the JSON array with 20 more records in exactly the same shape.\n[\n  {\"id\": 1, \"name\": \"Ada\", \"city\": \"London\", \"role\": \"engineer\"},\n  {\"id\": 2, \"name\": \"Grace\", \"city\": \"New York\", \"role\": \"scientist\"},\n  {\"id\": 3, \"name\": \"Alan\", \"city\": \"Manchester\", \"role\": \"analyst\"},\n",
+      "max_tokens": 192
+    },
+    {
+      "name": "tool-calling",
+      "type": "tool",
+      "prompt": "Continue this tool-call plan with 12 more steps in exactly the same shape. Reply with JSON only.\n[\n  {\"tool\": \"search_flights\", \"args\": {\"from\": \"London\", \"to\": \"Paris\", \"date\": \"2026-12-01\"}},\n  {\"tool\": \"search_hotels\", \"args\": {\"city\": \"Paris\", \"nights\": 3}},\n  {\"tool\": \"book_hotel\", \"args\": {\"hotel_id\": \"H-1042\", \"nights\": 3}}\n]",
+      "max_tokens": 192
+    },
+    {
+      "name": "multi-step-reasoning",
+      "type": "reasoning",
+      "prompt": "A train leaves at 09:00 travelling 60 km/h. A second leaves the same station at 10:00 travelling 90 km/h. At what distance from the station does the second catch the first? Show your steps.",
+      "max_tokens": 256
+    },
+    {
+      "name": "prose-summarisation",
+      "type": "prose",
+      "prompt": "Summarise in three sentences: Edge devices run small language models locally. Quantisation shrinks their memory footprint. Speculative decoding trades spare compute for faster token output.",
+      "max_tokens": 256
+    }
+  ]
+}
