@@ -52,4 +52,10 @@ Interactive showcase: [`docs/index.html`](docs/index.html) · [live report](http
 
 ![Decode roofline](results/roofline.png)
 
+### Report Screenshots
+
+![Architecture and memory tree](docs/preview-overview.png)
+![Throughput benchmarks](docs/preview-benchmarks.png)
+![Measured results](docs/preview-results.png)
+
 Medians suppress within-run noise, but cross-configuration CPU clock state still varies; treat sub-10% differences as noise.
