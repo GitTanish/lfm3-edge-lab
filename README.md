@@ -38,7 +38,7 @@ python main.py
 
 Measured on the target i3 / 8GB machine with `llama-server` b12648 (Vulkan build, `-ngl 0`), ChatML chat completions with `enable_thinking: false`. Each row is the median of 3 runs after 1 untimed warmup; IQR is reported per row in [`results/report.md`](results/report.md).
 
-Interactive showcase: [`results/report.html`](results/report.html) · [live report](https://gittanish.github.io/lfm3-edge-lab/results/report.html).
+Interactive showcase: [`docs/index.html`](docs/index.html) · [live report](https://gittanish.github.io/lfm3-edge-lab/).
 
 | Config | Decode tok/s (median) | IQR | RSS MB |
 | --- | --- | --- | --- |
