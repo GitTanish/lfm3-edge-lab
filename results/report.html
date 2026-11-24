@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lfm3-edge-lab — Technical Report (Commit 3015ff7)</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f9f8f5;
+      --surface: #ffffff;
+      --ink: #18181b;
+      --muted: #52525b;
+      --rule: #d6d3cb;
+      --accent: #991b1b;
+      --slate: #334155;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    html {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    .mono {
+      font-family: var(--mono);
+    }
+
+    /* Header */
+    header {
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .meta-line {
+      margin-top: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Headline Metrics Strip */
+    .metrics-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .metric-cell {
+      padding: 20px 16px 20px 0;
+      border-right: 1px solid var(--rule);
+    }
+
+    .metric-cell:not(:first-child) {
+      padding-left: 16px;
+    }
+
+    .metric-cell:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.25;
+    }
+
+    .metric-value.accent {
+      color: var(--accent);
+    }
+
+    .metric-note {
+      margin-top: 5px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Sections */
+    section {
+      padding: 32px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    section:last-of-type {
+      border-bottom: none;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .section-note {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      max-width: 72ch;
+    }
+
+    /* Controls & Buttons */
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    button {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 7px 12px;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--rule);
+      cursor: pointer;
+      line-height: 1.2;
+    }
+
+    button:hover {
+      border-color: var(--ink);
+    }
+
+    button.active {
+      background: var(--ink);
+      color: var(--surface);
+      border-color: var(--ink);
+    }
+
+    button.copied {
+      background: var(--accent);
+      color: var(--surface);
+      border-color: var(--accent);
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Plot Areas */
+    .plot-area {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 16px;
+      overflow-x: auto;
+    }
+
+    .plot-area svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-width: 620px;
+    }
+
+    /* Technical Node Note */
+    .node-note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      font-size: 13.5px;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .node-note strong {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .node-note span {
+      color: var(--muted);
+    }
+
+    /* 8.00 GB System RAM Bar */
+    .ram-bar-block {
+      margin-top: 18px;
+    }
+
+    .ram-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .ram-bar-track {
+      width: 100%;
+      height: 24px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      display: flex;
+      overflow: hidden;
+    }
+
+    .ram-seg-base {
+      background: var(--slate);
+      height: 100%;
+      transition: width 0.2s ease;
+    }
+
+    .ram-seg-delta {
+      background: var(--accent);
+      height: 100%;
+      transition: width 0.2s ease;
+    }
+
+    .ram-seg-free {
+      background: var(--surface);
+      height: 100%;
+      flex: 1;
+    }
+
+    .ram-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 8px;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border: 1px solid var(--rule);
+    }
+
+    /* Chart spacing */
+    .chart-block + .chart-block {
+      margin-top: 28px;
+    }
+
+    .chart-footnote {
+      margin-top: 8px;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    /* Results Table */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      font-size: 13px;
+    }
+
+    th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 10px 12px 10px 0;
+      border-bottom: 1px solid var(--rule);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 12px 10px 0;
+      border-bottom: 1px solid var(--rule);
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    td.val-col {
+      font-family: var(--mono);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td.val-col.accent {
+      color: var(--accent);
+    }
+
+    td.notes-col {
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    footer {
+      padding-top: 24px;
+      border-top: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .container {
+        padding: 28px 16px 48px;
+      }
+
+      .metrics-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .metric-cell {
+        padding: 16px 12px 16px 0;
+        border-right: none;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .metric-cell:nth-child(odd) {
+        border-right: 1px solid var(--rule);
+        padding-right: 12px;
+      }
+
+      .metric-cell:nth-child(even) {
+        padding-left: 14px;
+      }
+
+      .metric-cell:nth-last-child(-n+2) {
+        border-bottom: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header>
+      <h1>lfm3-edge-lab</h1>
+      <p class="subtitle">LFM3-1.7B CPU inference, quantization, and n-gram speculation on an 11th-Gen Intel Core i3 with 8 GB RAM</p>
+      <div class="meta-line">Commit 3015ff7 / llama.cpp b12648 / 1 warmup + 3 runs / AC power</div>
+    </header>
+
+    <!-- Headline Metrics Strip -->
+    <div class="metrics-strip" aria-label="Headline benchmark metrics">
+      <div class="metric-cell">
+        <div class="metric-label">Tool-Call Decode (N-Gram)</div>
+        <div class="metric-value accent">10.91 to 15.57 tok/s</div>
+        <div class="metric-note">+43% 3-run median; +85% peak single run</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">N-Gram Acceptance</div>
+        <div class="metric-value">49.1%</div>
+        <div class="metric-note">Tool-call median; 0 MB extra draft weights</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">2K to 32K Context RSS</div>
+        <div class="metric-value">1.33 to 1.74 GB</div>
+        <div class="metric-note">+411 MB across 16x context</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-label">Fastest 2K Quantization</div>
+        <div class="metric-value">9.5–11.3 tok/s</div>
+        <div class="metric-note">PTQ Q4_K_M, 1,099.6 MB file</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Interactive Architecture & Memory Tree -->
+    <section id="architecture">
+      <div class="section-header">
+        <h2>Architecture and Memory Tree</h2>
+      </div>
+      <p class="section-note">
+        Eighteen of LFM3-1.7B's 24 layers use fixed-size buffers with zero KV cache growth. Only the 6 global GQA layers expand with sequence length. Select a context size or click any node to inspect its memory behavior.
+      </p>
+
+      <div class="btn-group" id="ctxToggle">
+        <button type="button" data-ctx="2k">2K Context (1.33 GB RSS)</button>
+        <button type="button" data-ctx="32k" class="active">32K Context (1.74 GB RSS)</button>
+      </div>
+
+      <div class="plot-area">
+        <svg id="archSvg" viewBox="0 0 820 340" role="img" aria-label="LFM3-1.7B 24-layer tri-hybrid architecture and n-gram prompt lookup tree"></svg>
+      </div>
+
+      <div class="node-note" id="nodeNote">
+        <strong>6x Global GQA (4:1) — Active at 32K Context</strong>
+        <span>Sole source of KV cache growth across the 24-layer backbone. Grouped 4:1 head sharing limits a 16x context jump (2K to 32K) to +411 MB total RSS.</span>
+      </div>
+
+      <div class="ram-bar-block">
+        <div class="ram-bar-header">
+          <span id="ramUsedLabel">Used RSS: 1.74 GB / 8.00 GB</span>
+          <span id="ramFreeLabel">Remaining Headroom: 6.26 GB</span>
+        </div>
+        <div class="ram-bar-track" aria-label="8 GB system RAM allocation bar">
+          <div class="ram-seg-base" id="ramSegBase" style="width: 16.625%;"></div>
+          <div class="ram-seg-delta" id="ramSegDelta" style="width: 5.125%;"></div>
+          <div class="ram-seg-free"></div>
+        </div>
+        <div class="ram-legend">
+          <span><span class="swatch" style="background: var(--slate);"></span>2K Base RSS (1.33 GB)</span>
+          <span><span class="swatch" style="background: var(--accent);"></span><span id="ramDeltaLegend">32K Global KV Delta (+411 MB)</span></span>
+          <span><span class="swatch" style="background: var(--surface);"></span><span id="ramFreeLegend">Headroom (6.26 GB)</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Benchmark Charts -->
+    <section id="benchmarks">
+      <div class="section-header">
+        <h2>Measured Throughput Benchmarks</h2>
+      </div>
+      <p class="section-note">
+        Collected on Windows (AC power) via llama-server <code>/v1/chat/completions</code> with <code>enable_thinking: false</code>, 1 untimed warmup, and 3 measured runs per configuration.
+      </p>
+
+      <div class="chart-block">
+        <h3>Quantization Throughput at 2K Context</h3>
+        <div class="plot-area">
+          <svg id="quantSvg" viewBox="0 0 820 195" role="img" aria-label="Quantization decode throughput ranges at 2K context"></svg>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <h3>N-Gram Speculation on Tool-Calling Workload</h3>
+        <div class="plot-area">
+          <svg id="specSvg" viewBox="0 0 820 165" role="img" aria-label="N-gram speculation decode throughput comparison on tool-calling workload"></svg>
+        </div>
+        <div class="chart-footnote">
+          Footnote: Non-repetitive flat JSON produced no draft tokens (0% acceptance) and no measurable decode gain over baseline.
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Measured Results Table -->
+    <section id="results">
+      <div class="section-header">
+        <h2>Measured Results</h2>
+        <button type="button" id="copyMdBtn">Copy Markdown</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Value</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <span>lfm3-edge-lab / commit 3015ff7</span>
+      <span>11th-Gen Intel Core i3 / 8 GB RAM / llama.cpp b12648</span>
+    </footer>
+
+  </div>
+
+  <script>
+    /* ========================================================================
+       1. INTERACTIVE ARCHITECTURE & MEMORY TREE
+       ======================================================================== */
+    const NODE_NOTES = {
+      root: {
+        title: "LFM3-1.7B (24 Layers)",
+        body: "Tri-hybrid backbone executed CPU-only on an 11th-Gen Intel Core i3 via llama.cpp b12648. Combines 18 fixed-state layers with 6 global attention layers."
+      },
+      conv: {
+        title: "13x Gated Short Conv (kernel=7)",
+        body: "Maintains a constant 7-token rolling state for local syntax and phrasing. Adds 0 MB to the KV cache as context expands from 2K to 32K."
+      },
+      swa: {
+        title: "5x Sliding-Window GQA (256-token ring buffer)",
+        body: "Evicts entries older than 256 tokens using a capped ring buffer. Contributes 0 MB of additional memory growth between 2K and 32K context."
+      },
+      gqa: {
+        title: "6x Global GQA (4:1, 256K max context)",
+        body: "Sole source of KV cache growth across the 24-layer backbone. Grouped 4:1 head sharing limits a 16x context jump (2K to 32K) to +411 MB total RSS."
+      },
+      ngram: {
+        title: "N-Gram Prompt Lookup (0 MB extra weights)",
+        body: "Scans existing prompt and output tokens in RAM to propose multi-token continuations without loading a draft model. Reached 49.1% median acceptance on repetitive tool schemas."
+      },
+      verify: {
+        title: "Single-Pass Verification and Output",
+        body: "LFM3-1.7B verifies proposed n-gram spans in one forward pass, raising tool-call decode from 10.91 to 15.57 tok/s (+43% 3-run median) with zero added draft RAM."
+      }
+    };
+
+    let currentCtx = "32k";
+    let selectedNode = "gqa";
+
+    function renderArchitectureTree() {
+      const svg = document.getElementById("archSvg");
+      const is32k = currentCtx === "32k";
+      const gqaStroke = is32k ? "#991b1b" : "#18181b";
+      const gqaStrokeW = is32k ? "2" : "1.2";
+      const gqaFill = is32k ? "#fdf2f2" : "#ffffff";
+      const gqaStat = is32k ? "+411 MB at 32K" : "2K base (1.33 GB RSS)";
+
+      const nodeStyle = (id, defaultFill, defaultStroke) => {
+        const isSel = selectedNode === id;
+        return {
+          fill: isSel && id !== "gqa" ? "#f4f3ef" : defaultFill,
+          stroke: isSel ? "#991b1b" : defaultStroke,
+          sw: isSel ? "2" : "1"
+        };
+      };
+
+      const stRoot = nodeStyle("root", "#18181b", "#18181b");
+      const stConv = nodeStyle("conv", "#ffffff", "#d6d3cb");
+      const stSwa = nodeStyle("swa", "#ffffff", "#d6d3cb");
+      const stGqa = {
+        fill: gqaFill,
+        stroke: selectedNode === "gqa" || is32k ? "#991b1b" : "#d6d3cb",
+        sw: selectedNode === "gqa" || is32k ? "2" : "1"
+      };
+      const stNgram = nodeStyle("ngram", "#ffffff", "#334155");
+      const stVerify = nodeStyle("verify", "#f9f8f5", "#18181b");
+
+      svg.innerHTML = `
+        <g fill="none" stroke-linecap="square">
+          <!-- Root to 3-branch bus -->
+          <line x1="304" y1="62" x2="304" y2="86" stroke="#18181b" stroke-width="1.2" />
+          <line x1="104" y1="86" x2="504" y2="86" stroke="#18181b" stroke-width="1.2" />
+          <line x1="104" y1="86" x2="104" y2="108" stroke="#52525b" stroke-width="1.2" />
+          <line x1="304" y1="86" x2="304" y2="108" stroke="#52525b" stroke-width="1.2" />
+          <line x1="504" y1="86" x2="504" y2="108" stroke="${gqaStroke}" stroke-width="${gqaStrokeW}" />
+
+          <!-- Branches down to verification bus -->
+          <line x1="104" y1="224" x2="104" y2="250" stroke="#52525b" stroke-width="1.2" />
+          <line x1="304" y1="224" x2="304" y2="250" stroke="#52525b" stroke-width="1.2" />
+          <line x1="504" y1="224" x2="504" y2="250" stroke="${gqaStroke}" stroke-width="${gqaStrokeW}" />
+          <line x1="104" y1="250" x2="716" y2="250" stroke="#18181b" stroke-width="1.2" />
+
+          <!-- Parallel N-Gram branch -->
+          <line x1="716" y1="62" x2="716" y2="108" stroke="#334155" stroke-width="1.2" stroke-dasharray="4 3" />
+          <line x1="716" y1="224" x2="716" y2="250" stroke="#334155" stroke-width="1.2" stroke-dasharray="4 3" />
+
+          <!-- Convergence into Verification -->
+          <line x1="410" y1="250" x2="410" y2="274" stroke="#18181b" stroke-width="1.2" />
+        </g>
+
+        <!-- Root Node -->
+        <g data-node="root" style="cursor:pointer;">
+          <rect x="184" y="16" width="240" height="46" fill="${stRoot.fill}" stroke="${stRoot.stroke}" stroke-width="${stRoot.sw}" />
+          <text x="304" y="36" text-anchor="middle" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">LFM3-1.7B (24 Layers)</text>
+          <text x="304" y="52" text-anchor="middle" fill="#d6d3cb" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">Tri-Hybrid Backbone</text>
+        </g>
+
+        <!-- N-Gram Header Node -->
+        <g data-node="ngram" style="cursor:pointer;">
+          <rect x="624" y="16" width="184" height="46" fill="#334155" stroke="${stNgram.stroke}" stroke-width="${stNgram.sw}" />
+          <text x="716" y="36" text-anchor="middle" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">N-Gram Prompt Lookup</text>
+          <text x="716" y="52" text-anchor="middle" fill="#d6d3cb" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10">Parallel Drafter</text>
+        </g>
+
+        <!-- Branch 1: 13x Gated Short Conv -->
+        <g data-node="conv" style="cursor:pointer;">
+          <rect x="12" y="108" width="184" height="116" fill="${stConv.fill}" stroke="${stConv.stroke}" stroke-width="${stConv.sw}" />
+          <text x="104" y="132" text-anchor="middle" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">13x Gated Short Conv</text>
+          <line x1="28" y1="144" x2="180" y2="144" stroke="#d6d3cb" stroke-width="1" />
+          <text x="104" y="164" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">kernel=7</text>
+          <text x="104" y="182" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">constant rolling state</text>
+          <text x="104" y="206" text-anchor="middle" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" font-weight="700">0 MB KV growth</text>
+        </g>
+
+        <!-- Branch 2: 5x Sliding-Window GQA -->
+        <g data-node="swa" style="cursor:pointer;">
+          <rect x="212" y="108" width="184" height="116" fill="${stSwa.fill}" stroke="${stSwa.stroke}" stroke-width="${stSwa.sw}" />
+          <text x="304" y="132" text-anchor="middle" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">5x Sliding-Window GQA</text>
+          <line x1="228" y1="144" x2="380" y2="144" stroke="#d6d3cb" stroke-width="1" />
+          <text x="304" y="164" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">256-token ring buffer</text>
+          <text x="304" y="182" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">capped state</text>
+          <text x="304" y="206" text-anchor="middle" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" font-weight="700">0 MB KV growth</text>
+        </g>
+
+        <!-- Branch 3: 6x Global GQA (4:1) -->
+        <g data-node="gqa" style="cursor:pointer;">
+          <rect x="412" y="108" width="184" height="116" fill="${stGqa.fill}" stroke="${stGqa.stroke}" stroke-width="${stGqa.sw}" />
+          <text x="504" y="132" text-anchor="middle" fill="${is32k ? '#991b1b' : '#18181b'}" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">6x Global GQA (4:1)</text>
+          <line x1="428" y1="144" x2="580" y2="144" stroke="${is32k ? '#e5b4b4' : '#d6d3cb'}" stroke-width="1" />
+          <text x="504" y="164" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">256K max context</text>
+          <text x="504" y="182" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">sole KV growth source</text>
+          <text x="504" y="206" text-anchor="middle" fill="${is32k ? '#991b1b' : '#18181b'}" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" font-weight="700">${gqaStat}</text>
+        </g>
+
+        <!-- Parallel Branch 4: N-Gram Candidate Feed -->
+        <g data-node="ngram" style="cursor:pointer;">
+          <rect x="624" y="108" width="184" height="116" fill="${stNgram.fill}" stroke="${stNgram.stroke}" stroke-width="${stNgram.sw}" />
+          <text x="716" y="132" text-anchor="middle" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">Candidate Token Feed</text>
+          <line x1="640" y1="144" x2="792" y2="144" stroke="#d6d3cb" stroke-width="1" />
+          <text x="716" y="164" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">0 MB extra weights</text>
+          <text x="716" y="182" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">49.1% tool acceptance</text>
+          <text x="716" y="206" text-anchor="middle" fill="#334155" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5" font-weight="700">10.91 to 15.57 tok/s</text>
+        </g>
+
+        <!-- Convergence / Verification Node -->
+        <g data-node="verify" style="cursor:pointer;">
+          <rect x="210" y="274" width="400" height="46" fill="${stVerify.fill}" stroke="${stVerify.stroke}" stroke-width="${stVerify.sw}" />
+          <text x="410" y="294" text-anchor="middle" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">Single-Pass Verification &amp; Output</text>
+          <text x="410" y="310" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">/v1/chat/completions (enable_thinking: false)</text>
+        </g>
+      `;
+
+      svg.querySelectorAll("[data-node]").forEach(el => {
+        el.addEventListener("click", () => {
+          selectedNode = el.dataset.node;
+          updateNodeNote();
+          renderArchitectureTree();
+        });
+      });
+    }
+
+    function updateNodeNote() {
+      const info = NODE_NOTES[selectedNode] || NODE_NOTES.gqa;
+      const box = document.getElementById("nodeNote");
+      box.innerHTML = `<strong>${info.title}</strong><span>${info.body}</span>`;
+    }
+
+    function updateRamBar() {
+      const is32k = currentCtx === "32k";
+      const total = 8.00;
+      const base = 1.33;
+      const delta = is32k ? 0.41 : 0.00;
+      const used = +(base + delta).toFixed(2);
+      const free = +(total - used).toFixed(2);
+
+      document.getElementById("ramUsedLabel").textContent = `Used RSS: ${used.toFixed(2)} GB / 8.00 GB`;
+      document.getElementById("ramFreeLabel").textContent = `Remaining Headroom: ${free.toFixed(2)} GB`;
+      document.getElementById("ramSegBase").style.width = `${(base / total) * 100}%`;
+      document.getElementById("ramSegDelta").style.width = `${(delta / total) * 100}%`;
+      document.getElementById("ramDeltaLegend").textContent = is32k ? "32K Global KV Delta (+411 MB)" : "Global KV Delta (0 MB at 2K)";
+      document.getElementById("ramFreeLegend").textContent = `Headroom (${free.toFixed(2)} GB)`;
+    }
+
+    document.getElementById("ctxToggle").addEventListener("click", e => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      currentCtx = btn.dataset.ctx;
+      document.querySelectorAll("#ctxToggle button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      updateRamBar();
+      renderArchitectureTree();
+    });
+
+    /* ========================================================================
+       2. CHART 1: QUANTIZATION THROUGHPUT AT 2K CONTEXT (RANGE PLOT)
+       ======================================================================== */
+    function renderQuantChart() {
+      const svg = document.getElementById("quantSvg");
+      const rows = [
+        { name: "PTQ Q4_K_M", size: "1,099.6 MB", min: 9.5, max: 11.3, note: "9.5 – 11.3 tok/s", color: "#991b1b" },
+        { name: "QAD Q4_0", size: "1,049.6 MB", min: 8.9, max: 11.0, note: "8.9 – 11.0 tok/s (IQR 0.3 – 0.9)", color: "#334155" },
+        { name: "PTQ Q8_0", size: "1,846.2 MB", min: 6.6, max: 9.4, note: "6.6 – 9.4 tok/s (~1.9 – 2.1 GB RSS)", color: "#52525b" }
+      ];
+
+      const left = 175;
+      const right = 545;
+      const plotW = right - left;
+      const maxX = 14;
+      const x = v => left + (v / maxX) * plotW;
+
+      let out = "";
+
+      // Vertical gridlines and axis ticks
+      [0, 2, 4, 6, 8, 10, 12, 14].forEach(t => {
+        const tx = x(t);
+        out += `<line x1="${tx}" y1="16" x2="${tx}" y2="160" stroke="#e7e5e0" stroke-width="1" />`;
+        out += `<text x="${tx}" y="178" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">${t}</text>`;
+      });
+
+      // Axes
+      out += `<line x1="${left}" y1="160" x2="${right}" y2="160" stroke="#18181b" stroke-width="1" />`;
+      out += `<line x1="${left}" y1="16" x2="${left}" y2="160" stroke="#18181b" stroke-width="1" />`;
+      out += `<text x="${left + plotW / 2}" y="192" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10">Decode Throughput (tok/s)</text>`;
+
+      // Rows
+      const yCenters = [42, 90, 138];
+      rows.forEach((r, i) => {
+        const cy = yCenters[i];
+        const x1 = x(r.min);
+        const x2 = x(r.max);
+
+        // Left labels
+        out += `<text x="${left - 14}" y="${cy - 2}" text-anchor="end" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">${r.name}</text>`;
+        out += `<text x="${left - 14}" y="${cy + 13}" text-anchor="end" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">${r.size}</text>`;
+
+        // Guide line from axis to range start
+        out += `<line x1="${left}" y1="${cy}" x2="${x1}" y2="${cy}" stroke="#d6d3cb" stroke-width="1" stroke-dasharray="2 3" />`;
+
+        // Range bar and end caps
+        out += `<rect x="${x1}" y="${cy - 7}" width="${Math.max(4, x2 - x1)}" height="14" fill="${r.color}" fill-opacity="0.18" stroke="${r.color}" stroke-width="1.5" />`;
+        out += `<line x1="${x1}" y1="${cy - 11}" x2="${x1}" y2="${cy + 11}" stroke="${r.color}" stroke-width="2" />`;
+        out += `<line x1="${x2}" y1="${cy - 11}" x2="${x2}" y2="${cy + 11}" stroke="${r.color}" stroke-width="2" />`;
+
+        // Right value label
+        out += `<text x="${right + 16}" y="${cy + 4}" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11">${r.note}</text>`;
+      });
+
+      svg.innerHTML = out;
+    }
+
+    /* ========================================================================
+       3. CHART 2: N-GRAM SPECULATION ON TOOL-CALLING WORKLOAD
+       ======================================================================== */
+    function renderSpecChart() {
+      const svg = document.getElementById("specSvg");
+      const left = 215;
+      const right = 605;
+      const plotW = right - left;
+      const maxX = 22;
+      const x = v => left + (v / maxX) * plotW;
+
+      const peakVal = 10.91 * 1.85; // +85% reference mark
+      const peakX = x(peakVal);
+
+      let out = "";
+
+      // Vertical gridlines and ticks
+      [0, 5, 10, 15, 20].forEach(t => {
+        const tx = x(t);
+        out += `<line x1="${tx}" y1="28" x2="${tx}" y2="128" stroke="#e7e5e0" stroke-width="1" />`;
+        out += `<text x="${tx}" y="145" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">${t}</text>`;
+      });
+
+      // Axes
+      out += `<line x1="${left}" y1="128" x2="${right}" y2="128" stroke="#18181b" stroke-width="1" />`;
+      out += `<line x1="${left}" y1="28" x2="${left}" y2="128" stroke="#18181b" stroke-width="1" />`;
+      out += `<text x="${left + plotW / 2}" y="160" text-anchor="middle" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10">Tool-Call Decode Throughput (tok/s)</text>`;
+
+      // Dashed +85% peak reference tick
+      out += `<line x1="${peakX}" y1="28" x2="${peakX}" y2="128" stroke="#52525b" stroke-width="1.2" stroke-dasharray="4 3" />`;
+      out += `<text x="${peakX - 6}" y="20" text-anchor="end" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">Single-run peak (+85%, earlier pass)</text>`;
+
+      // Bar 1: Baseline Decode
+      const y1 = 56;
+      const w1 = x(10.91) - left;
+      out += `<text x="${left - 14}" y="${y1 + 4}" text-anchor="end" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">Baseline Decode</text>`;
+      out += `<rect x="${left}" y="${y1 - 10}" width="${w1}" height="20" fill="#334155" />`;
+      out += `<text x="${right + 14}" y="${y1 + 4}" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5">10.91 tok/s</text>`;
+
+      // Bar 2: N-Gram Speculation (3-run median)
+      const y2 = 102;
+      const w2 = x(15.57) - left;
+      out += `<text x="${left - 14}" y="${y2 - 2}" text-anchor="end" fill="#18181b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" font-weight="700">N-Gram Speculation</text>`;
+      out += `<text x="${left - 14}" y="${y2 + 12}" text-anchor="end" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">3-run median</text>`;
+      out += `<rect x="${left}" y="${y2 - 10}" width="${w2}" height="20" fill="#991b1b" />`;
+      out += `<text x="${right + 14}" y="${y2 - 1}" fill="#991b1b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="700">15.57 tok/s (+43%)</text>`;
+      out += `<text x="${right + 14}" y="${y2 + 13}" fill="#52525b" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10.5">49.1% acceptance</text>`;
+
+      svg.innerHTML = out;
+    }
+
+    /* ========================================================================
+       4. MEASURED RESULTS TABLE & MARKDOWN COPY
+       ======================================================================== */
+    const RESULTS_ROWS = [
+      {
+        metric: "Tool-call decode (N-gram)",
+        value: "10.91 to 15.57 tok/s",
+        notes: "+43% 3-run median; +85% peak single run (earlier pass)",
+        accent: true
+      },
+      {
+        metric: "N-gram tool-call acceptance",
+        value: "49.1%",
+        notes: "3-run median on repetitive schemas; 0 MB extra draft weights",
+        accent: false
+      },
+      {
+        metric: "N-gram flat JSON acceptance",
+        value: "2.6%",
+        notes: "Non-repetitive JSON; no measurable decode gain over baseline",
+        accent: false
+      },
+      {
+        metric: "KV scaling (2K to 32K)",
+        value: "1.33 to 1.74 GB",
+        notes: "+411 MB RSS across 16x context expansion (6.26 GB remaining on 8 GB RAM)",
+        accent: true
+      },
+      {
+        metric: "PTQ Q4_K_M 2K decode",
+        value: "9.5–11.3 tok/s",
+        notes: "1,099.6 MB file; ~1.33 GB RSS; fastest baseline 2K quantization",
+        accent: false
+      },
+      {
+        metric: "QAD Q4_0 2K decode",
+        value: "8.9–11.0 tok/s",
+        notes: "1,049.6 MB file; IQR 0.3–0.9 tok/s",
+        accent: false
+      },
+      {
+        metric: "PTQ Q8_0 2K decode",
+        value: "6.6–9.4 tok/s",
+        notes: "1,846.2 MB file; ~1.9–2.1 GB RSS",
+        accent: false
+      }
+    ];
+
+    function renderResultsTable() {
+      const tbody = document.getElementById("resultsTbody");
+      tbody.innerHTML = RESULTS_ROWS.map(r => `
+        <tr>
+          <td>${r.metric}</td>
+          <td class="val-col ${r.accent ? 'accent' : ''}">${r.value}</td>
+          <td class="notes-col">${r.notes}</td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("copyMdBtn").addEventListener("click", () => {
+      const header = "| Metric | Value | Notes |\n| :--- | :--- | :--- |";
+      const lines = RESULTS_ROWS.map(r => `| ${r.metric} | ${r.value} | ${r.notes} |`);
+      const markdown = [header, ...lines].join("\n");
+
+      const textarea = document.createElement("textarea");
+      textarea.value = markdown;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      const btn = document.getElementById("copyMdBtn");
+      btn.textContent = "Copied";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = "Copy Markdown";
+        btn.classList.remove("copied");
+      }, 1800);
+    });
+
+    /* ========================================================================
+       INIT
+       ======================================================================== */
+    window.addEventListener("DOMContentLoaded", () => {
+      updateRamBar();
+      updateNodeNote();
+      renderArchitectureTree();
+      renderQuantChart();
+      renderSpecChart();
+      renderResultsTable();
+    });
+  </script>
+</body>
+</html>
