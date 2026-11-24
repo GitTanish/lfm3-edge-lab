@@ -1,5 +1,10 @@
 # lfm3-edge-lab
 
+[![Live report](https://img.shields.io/badge/live-report-991b1b)](https://tanishsaroj.me/lfm3-edge-lab/)
+[![llama.cpp](https://img.shields.io/badge/llama.cpp-b12648-334155)](https://github.com/ggml-org/llama.cpp)
+[![Python](https://img.shields.io/badge/python-3.10%2B-334155)](requirements.txt)
+[![Hardware](https://img.shields.io/badge/hardware-i3%20%C2%B7%208%20GB-52525b)](#results)
+
 Empirical CPU inference and quantization profiler for **Liquid AI's LFM3-1.7B** tri-hybrid architecture (`13x Gated Short Conv + 5x Sliding-Window GQA + 6x Global GQA`) running on memory-constrained consumer hardware (**11th-Gen Intel Core i3, 8GB RAM**) via `llama.cpp`.
 
 ## What This Benchmarks
