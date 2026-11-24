@@ -18,7 +18,8 @@ COLUMNS = [
     ("workload_type", "Workload"),
     ("prefill_tps", "Prefill tok/s"),
     ("decode_tps", "Decode tok/s"),
-    ("acceptance_rate", "Accept"),
+    ("decode_tps_iqr", "IQR"),
+    ("acceptance_pct", "Accept %"),
     ("rss_mb", "RSS MB"),
 ]
 
@@ -54,11 +55,13 @@ def _roofline(rows: list[dict], config: dict, path: str) -> None:
 
     figure, axes = plt.subplots(figsize=(8, 5))
     for name, group in grouped.items():
-        rates = [r["decode_tps"] for r in group if r["decode_tps"] is not None]
-        if not rates:
+        rows = [r for r in group if r["decode_tps"] is not None]
+        if not rows:
             continue
         rss = sum(r["rss_mb"] for r in group) / len(group)
-        axes.scatter(rss, sum(rates) / len(rates), label=name, s=70, zorder=3)
+        decode = sum(r["decode_tps"] for r in rows) / len(rows)
+        iqr = sum(r["decode_tps_iqr"] or 0.0 for r in rows) / len(rows)
+        axes.errorbar(rss, decode, yerr=iqr / 2, fmt="o", capsize=4, label=name, zorder=3)
 
     bandwidth = config.get("memory_bandwidth_gbs")
     if bandwidth:

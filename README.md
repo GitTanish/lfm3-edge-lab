@@ -36,18 +36,18 @@ python main.py
 
 ## Results
 
-Measured on the target i3 / 8GB machine with `llama-server` b12648 (Vulkan build, `-ngl 0`). Full table: [`results/report.md`](results/report.md).
+Measured on the target i3 / 8GB machine with `llama-server` b12648 (Vulkan build, `-ngl 0`), ChatML chat completions with `enable_thinking: false`. Each row is the median of 3 runs after 1 untimed warmup; IQR is reported per row in [`results/report.md`](results/report.md).
 
-| Config | Decode tok/s | RSS MB |
-| --- | --- | --- |
-| QAD Q4_0 2K | 8.1–10.1 | 1,318–1,348 |
-| PTQ Q4_K_M 2K | 12.9–13.4 | 1,370–1,400 |
-| PTQ Q8_0 2K | 9.0–9.2 | 2,113–2,137 |
+| Config | Decode tok/s (median) | IQR | RSS MB |
+| --- | --- | --- | --- |
+| QAD Q4_0 2K | 8.9–11.0 | 0.3–0.9 | 1,118–1,326 |
+| PTQ Q4_K_M 2K | 9.5–11.3 | 0.7–1.5 | 1,162–1,378 |
+| PTQ Q8_0 2K | 6.6–9.4 | 0.2–0.9 | 1,907–2,065 |
 
-- **KV scaling (QAD, 2K→32K):** RSS grows 1,318 → 1,730 MB (~412 MB for 30K extra context), with decode holding ~11.2–11.5 tok/s on the JSON workload.
-- **Speculative lookup:** `ngram-simple` acceptance was 59.8% on repetitive tool calls (16.3 vs 8.8 tok/s baseline) but only 2.6% on JSON (no gain). Prompt-lookup speculation pays off when output reuses long prompt n-grams.
-- **Q8_0 reasoning** emitted EOS on the first token, so its decode rate is reported as `—`.
+- **KV scaling (QAD, JSON workload, 2K→32K):** RSS grows **1,326 → 1,737 MB** (+411 MB for 30K extra context), while decode stays ~9.0–12.0 tok/s.
+- **Speculative lookup:** `ngram-simple` reached **49.1% acceptance** on repetitive tool calls, lifting median decode **10.91 → 15.57 tok/s (+43%)**; the earlier single-run pass showed up to **+85%**. JSON output has no long prompt n-gram reuse, so acceptance was 0% and there was no reliable gain.
+- **ChatML + `enable_thinking: false`** removed premature EOS and reasoning-token skew; all four workloads now produce usable decode measurements on every quantisation.
 
 ![Decode roofline](results/roofline.png)
 
-These are single-run numbers; run-to-run variance was visible (roughly ±20% on the 2K JSON rows), so re-run `python main.py` before drawing fine-grained conclusions.
+Medians suppress within-run noise, but cross-configuration CPU clock state still varies; treat sub-10% differences as noise.

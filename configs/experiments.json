@@ -4,6 +4,7 @@
   "port": 8080,
   "memory_bandwidth_gbs": 51.2,
   "warmup": true,
+  "repeats": 3,
   "experiments": [
     {
       "name": "QAD-Q4_0-2K",

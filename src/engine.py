@@ -92,6 +92,18 @@ class Engine:
             },
         )
 
+    def chat(self, messages: list[dict], max_tokens: int = 160) -> dict:
+        return _post(
+            self.base_url + "/v1/chat/completions",
+            {
+                "messages": messages,
+                "max_tokens": max_tokens,
+                "temperature": 0,
+                "chat_template_kwargs": {"enable_thinking": False},
+                "timings_per_token": True,
+            },
+        )
+
     def rss_mb(self) -> float:
         """Resident set of the server and its children, in MB."""
         if self.proc is None:
